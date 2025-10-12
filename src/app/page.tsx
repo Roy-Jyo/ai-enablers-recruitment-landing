@@ -1,152 +1,164 @@
-"use client";
-import { useState } from "react";
+'use client';
+
+import { useState } from 'react';
 
 export default function Home() {
-  const [email, setEmail] = useState("");
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
+
+  const [status, setStatus] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('Sending...');
+    try {
+      const res = await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) setStatus('Message sent successfully!');
+      else setStatus('Failed to send message.');
+    } catch {
+      setStatus('Failed to send message.');
+    }
+  };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-800">
+    <main className="bg-gray-50 text-gray-900">
       {/* Hero Section */}
-      <section className="text-center px-6 py-16 max-w-4xl">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-          Transform Recruitment with{" "}
-          <span className="text-blue-600">AI Automation</span>
+      <section className="text-center py-24 bg-blue-50">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          Revolutionise Recruitment with AI
         </h1>
-        <p className="text-lg md:text-xl text-gray-600 mb-8">
-          Anstel Global helps organisations revolutionise hiring —
-          automating everything from job ads to AI-powered interviews. Save
-          time, cut costs, and recruit smarter.
+        <p className="text-lg mb-8 text-gray-600">
+          Streamline your entire hiring journey — from job advertisement to first interview — powered by intelligent automation.
         </p>
-        <div className="flex flex-col md:flex-row gap-4 justify-center">
-          <a
-            href="#demo"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md"
-          >
-            Book a Demo
-          </a>
-          <a
-            href="#learn"
-            className="border border-blue-600 text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50"
-          >
-            Learn More
-          </a>
-        </div>
-      </section>
-
-      {/* Value Proposition Section */}
-      <section id="learn" className="max-w-5xl px-6 py-16 text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">
-          End-to-End Recruitment Efficiency with AI
-        </h2>
-        <div className="grid md:grid-cols-3 gap-8 text-left">
-          <div className="p-6 bg-white shadow-lg rounded-2xl">
-            <h3 className="text-xl font-semibold mb-3 text-blue-700">
-              AI-Powered Job Ads
-            </h3>
-            <p>
-              Automatically generate and publish job descriptions to leading
-              platforms — no need for separate ATS tools or manual uploads.
-            </p>
-          </div>
-          <div className="p-6 bg-white shadow-lg rounded-2xl">
-            <h3 className="text-xl font-semibold mb-3 text-blue-700">
-              24/7 Candidate Screening
-            </h3>
-            <p>
-              Let our AI analyse CVs continuously, shortlist qualified
-              candidates, and schedule interviews — even while you sleep.
-            </p>
-          </div>
-          <div className="p-6 bg-white shadow-lg rounded-2xl">
-            <h3 className="text-xl font-semibold mb-3 text-blue-700">
-              AI-Driven Interviews
-            </h3>
-            <p>
-              Conduct structured AI interviews with real-time insights,
-              reducing human bias and freeing your team for final decision-making.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Case Study */}
-      <section className="max-w-5xl px-6 py-16 bg-blue-50 rounded-3xl my-8 text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">
-          Case Study: Anstel Global
-        </h2>
-        <p className="text-gray-700 mb-4">
-          Anstel Global streamlined its recruitment process using our AI
-          platform, cutting hiring time by 60% and removing the need for
-          multiple recruitment tools.
-        </p>
-        <p className="text-gray-700 mb-8">
-          With 24/7 candidate analysis and automated interview scheduling,
-          they achieved faster shortlisting and improved candidate experience.
-        </p>
-        <a
-          href="#demo"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md"
-        >
-          See the Results
+        <a href="#book-demo" className="bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800">
+          Get Started
         </a>
       </section>
 
-      {/* Demo Section */}
-      <section id="demo" className="max-w-xl text-center py-16">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
-          Book a Live Demo
-        </h2>
-        <p className="text-gray-600 mb-8">
-          See how AI can transform your recruitment pipeline — from sourcing to
-          interviewing — in action.
-        </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            alert(`Demo request submitted for ${email}`);
-            setEmail("");
-          }}
-          className="flex flex-col md:flex-row gap-4 justify-center"
-        >
-          <input
-            type="email"
-            placeholder="Enter your business email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md"
-          >
-            Request Demo
-          </button>
-        </form>
+      {/* Features Section */}
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-6 px-8 md:px-24 py-16 text-center bg-white">
+        {[
+          {
+            title: 'Smart Job Ads',
+            desc: 'Automatically generate engaging job descriptions and publish across multiple job boards.',
+            icon: '📄',
+          },
+          {
+            title: 'AI CV Sorting',
+            desc: 'Rank and shortlist candidates instantly based on skills, experience, and cultural fit.',
+            icon: '👥',
+          },
+          {
+            title: 'Auto Interview Booking',
+            desc: 'Seamlessly schedule initial screening interviews and manage calendars automatically.',
+            icon: '📅',
+          },
+          {
+            title: 'AI Interviewer',
+            desc: 'Conduct structured first-round interviews with natural-language AI — fair, fast, and consistent.',
+            icon: '🧠',
+          },
+        ].map((item, idx) => (
+          <div key={idx} className="p-6 bg-gray-50 rounded-2xl shadow-sm hover:shadow-md">
+            <div className="text-4xl mb-4">{item.icon}</div>
+            <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+            <p className="text-gray-600 text-sm">{item.desc}</p>
+          </div>
+        ))}
       </section>
 
-      {/* Footer */}
-      <footer className="w-full py-6 text-center border-t border-gray-200 mt-8 text-gray-500 text-sm">
-        © {new Date().getFullYear()} Anstel Global — AI Recruitment Automation.
-        All rights reserved.
-      </footer>
+      {/* Value Section */}
+      <section className="py-16 bg-blue-50 text-center">
+        <h2 className="text-3xl font-bold mb-8">Where RecruitAI Adds Value</h2>
+        <ul className="max-w-2xl mx-auto text-left text-gray-700 space-y-4">
+          <li>✅ Eliminate dependency on separate ATS systems — manage the entire recruitment lifecycle in one place.</li>
+          <li>✅ 24/7 background processing for faster candidate review, screening, and interview scheduling.</li>
+          <li>✅ Fully automated shortlisting and interview coordination with minimal human intervention.</li>
+          <li>✅ Significantly reduce recruitment overheads while improving speed and consistency in decision-making.</li>
+        </ul>
+      </section>
 
-      {/* Google Analytics */}
-      <script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"
-      ></script>
-      <script
-        id="google-analytics"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-XXXXXXX');
-          `,
-        }}
-      />
+      {/* Case Study */}
+      <section className="py-16 text-center bg-white">
+        <h2 className="text-3xl font-bold mb-6">
+          Proven Results: The Anstel Global Success Story
+        </h2>
+        <p className="text-gray-600 max-w-3xl mx-auto mb-12">
+          Anstel Global, a multinational electronics manufacturer, integrated RecruitAI into its end-to-end recruitment workflow. Within three months, they transformed their hiring process across Asia-Pacific.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-8 md:px-24">
+          <div className="p-6 bg-gray-50 rounded-2xl shadow-sm">
+            <h3 className="text-3xl font-bold text-blue-600 mb-2">65%</h3>
+            <p className="text-gray-600">Reduction in time-to-hire</p>
+          </div>
+          <div className="p-6 bg-gray-50 rounded-2xl shadow-sm">
+            <h3 className="text-3xl font-bold text-blue-600 mb-2">40%</h3>
+            <p className="text-gray-600">Decrease in recruitment costs</p>
+          </div>
+          <div className="p-6 bg-gray-50 rounded-2xl shadow-sm">
+            <h3 className="text-3xl font-bold text-blue-600 mb-2">24/7</h3>
+            <p className="text-gray-600">Continuous AI-driven candidate processing</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Book a Demo */}
+      <section id="book-demo" className="py-20 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-center">
+        <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Recruitment?</h2>
+        <p className="mb-10 text-lg">
+          Start your AI hiring journey today and experience efficiency like never before.
+        </p>
+        <div className="max-w-md mx-auto bg-white text-gray-900 p-8 rounded-2xl shadow-lg">
+          <h3 className="text-xl font-semibold mb-6 text-center">Book a Demo</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              name="name"
+              type="text"
+              placeholder="Name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-md"
+              required
+            />
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-md"
+              required
+            />
+            <textarea
+              name="message"
+              placeholder="Message"
+              value={formData.message}
+              onChange={handleChange}
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-md"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
+            >
+              Send
+            </button>
+          </form>
+          {status && <p className="text-center mt-4 text-sm">{status}</p>}
+        </div>
+      </section>
     </main>
   );
 }

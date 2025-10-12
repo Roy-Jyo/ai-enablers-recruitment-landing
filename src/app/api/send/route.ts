@@ -1,61 +1,66 @@
-import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+import { NextResponse } from 'next/server';
+import { Client } from '@microsoft/microsoft-graph-client';
+import 'isomorphic-fetch';
 
-/**
- * This API route receives POST data from your form (name, email, message)
- * and sends it as an email using your Microsoft 365 mailbox credentials.
- */
-export async function POST(req: Request) {
-  const { name, email, message } = await req.json();
+async function getAccessToken() {
+  const tenantId = process.env.M365_TENANT_ID!;
+  const clientId = process.env.M365_CLIENT_ID!;
+  const clientSecret = process.env.M365_CLIENT_SECRET!;
 
-  // Basic validation
-  if (!name || !email || !message) {
-    return NextResponse.json({ success: false, error: "Missing fields" });
+  const tokenResponse = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      scope: 'https://graph.microsoft.com/.default',
+      client_secret: clientSecret,
+      grant_type: 'client_credentials',
+    }),
+  });
+
+  const data = await tokenResponse.json();
+  if (!data.access_token) {
+    console.error('Error getting Microsoft Graph token:', data);
+    throw new Error('Failed to get access token');
   }
 
+  return data.access_token;
+}
+
+export async function POST(req: Request) {
   try {
-    // Configure M365 SMTP
-    const transporter = nodemailer.createTransport({
-      host: "smtp.office365.com",
-      port: 587,
-      secure: false, // STARTTLS
-      auth: {
-        user: process.env.M365_USER,
-        pass: process.env.M365_PASS,
-      },
-      tls: {
-        ciphers: "SSLv3",
-      },
+    const { name, email, message } = await req.json();
+
+    const accessToken = await getAccessToken();
+
+    const client = Client.init({
+      authProvider: (done) => done(null, accessToken),
     });
 
-    // Define email
-    const mailOptions = {
-      from: process.env.M365_USER,
-      to: process.env.M365_TO || process.env.M365_USER, // Default to sender if no recipient set
-      subject: `Demo Request from ${name}`,
-      text: `
-        You have a new demo request.
+    // Replace with the mailbox address where you want to receive demo requests
+    const recipient = process.env.M365_RECIPIENT_EMAIL!;
 
-        Name: ${name}
-        Email: ${email}
-        Message:
-        ${message}
-      `,
-      html: `
-        <h2>New Demo Request</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-      `,
-    };
+    await client.api('/users/' + recipient + '/sendMail').post({
+      message: {
+        subject: `New RecruitAI Demo Request from ${name}`,
+        body: {
+          contentType: 'Text',
+          content: `Name: ${name}\nEmail: ${email}\nMessage:\n${message}`,
+        },
+        toRecipients: [
+          {
+            emailAddress: {
+              address: recipient,
+            },
+          },
+        ],
+      },
+      saveToSentItems: 'false',
+    });
 
-    // Send the email
-    await transporter.sendMail(mailOptions);
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: 'Demo request sent successfully' });
   } catch (error: any) {
-    console.error("Email send error:", error);
-    return NextResponse.json({ success: false, error: error.message });
+    console.error('Error sending email:', error);
+    return NextResponse.json({ error: 'Error sending email' }, { status: 500 });
   }
 }
